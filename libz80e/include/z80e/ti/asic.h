@@ -1,6 +1,6 @@
 #ifndef ASIC_H
 #define ASIC_H
-
+#define NOLINK 1
 #include <stdint.h>
 #ifndef NOLINK
 #include <poll.h>

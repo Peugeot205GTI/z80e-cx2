@@ -1,3 +1,5 @@
+#define NOLINK 1
+
 #include "runloop/runloop.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,25 +33,9 @@ long long get_time_nsec() {
 #ifdef EMSCRIPTEN
 	return emscripten_get_now() * 1000000;
 #else
-#ifdef APPLE
-	if (!orwl_timestart) {
-		mach_timebase_info_data_t tb = { 0 };
-		mach_timebase_info(&tb);
-		orwl_timebase = tb.numer;
-		orwl_timebase /= tb.denom;
-		orwl_timestart = mach_absolute_time();
-	}
-	struct timespec t;
-	double diff = (mach_absolute_time() - orwl_timestart) * orwl_timebase;
-	t.tv_sec = diff * ORWL_NANO;
-	t.tv_nsec = diff - (t.tv_sec * ORWL_GIGA);
-	return t.tv_nsec;
-#else
-	struct timespec sp;
-	clock_gettime(CLOCK_MONOTONIC, &sp);
-
-	return sp.tv_sec * 1000000000 + sp.tv_nsec;
-#endif
+	static long long fake_time = 0;
+	fake_time += 1000000; // increment 1 ms per call (adjust as needed)
+	return fake_time;
 #endif
 }
 

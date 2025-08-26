@@ -3,24 +3,15 @@
 # ============================================
 
 # Compiler & flags
-CC      := gcc
+CC      := nspire-gcc
 CFLAGS  := -Wall -Wextra -pedantic -O2 -fPIC \
            -Ilibz80e/include -Ilibz80e/include/z80e \
            -Iscas/common
 CFLAGS  += $(if $(SCAS_INCLUDES),-I$(SCAS_INCLUDES))
+ld      := nspire-ld
 LDFLAGS :=
-LIBS    := -lreadline
+LIBS    :=
 LIBS    += $(if $(SCAS_LIBRARIES),$(SCAS_LIBRARIES))
-
-# Platform-specific tweaks
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-    CFLAGS += -DAPPLE
-else ifeq ($(UNAME_S),Haiku)
-    # Haiku has no librt
-else
-    LIBS += -lrt
-endif
 
 # ---- Sources ----
 
@@ -41,38 +32,31 @@ Z80E_SRC := \
 
 Z80E_OBJ := $(Z80E_SRC:.c=.o)
 
-# Shared library target
-LIBZ80E := libz80e.so
 
 # TUI frontend sources (from frontends/tui/CMakeLists.txt)
 TUI_SRC := \
-    frontends/tui/main.c \
-    frontends/tui/tui.c
+    frontends/CX-II/main.c
 
 TUI_OBJ := $(TUI_SRC:.c=.o)
 
 # TUI executable
-TUI_BIN := z80e-tui
+TUI_BIN := z80e-CX-II
 
 # ============================================
 # Rules
 # ============================================
 
-all: $(LIBZ80E) $(TUI_BIN)
-
-# Shared lib
-$(LIBZ80E): $(Z80E_OBJ)
-	$(CC) -static -o $@ $^ $(LDFLAGS)
+all: $(TUI_BIN)
 
 # Executable (links objects + shared lib)
-$(TUI_BIN): $(TUI_OBJ) $(Z80E_OBJ) $(LIBZ80E)
-	$(CC) -static -o $@ $(TUI_OBJ) $(Z80E_OBJ) -L. -lz80e $(LIBS)
+$(TUI_BIN):  $(TUI_OBJ) $(Z80E_OBJ)
+	$(CC) -static -o $@ $(TUI_OBJ) $(Z80E_OBJ) /root/scas/bin/scas.a
 
 # Generic compile rule
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(Z80E_OBJ) $(TUI_OBJ) $(LIBZ80E) $(TUI_BIN)
+	rm -f $(Z80E_OBJ) $(TUI_OBJ) $(TUI_BIN)
 
 .PHONY: all clean
