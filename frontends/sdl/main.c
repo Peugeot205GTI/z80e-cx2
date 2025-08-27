@@ -165,8 +165,7 @@ void setDevice(appContext_t *context, char *target) {
 	} else if (strcasecmp(target, "TI84pCSE") == 0) {
 		context->device = TI84pCSE;
 	} else {
-		printf("Incorrect usage. See z80e --help.\n");
-		exit(1);
+		context->device = TI84pSE;
 	}
 }
 
